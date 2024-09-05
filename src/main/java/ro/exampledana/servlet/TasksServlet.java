@@ -144,30 +144,32 @@ public class TasksServlet extends HttpServlet {
                 if(!notificationState) {
                     try {
                         // Initialize Gmail service
-                         gmailService = new GmailService();
+                        gmailService = new GmailService();
                         // Start email scheduler
                         scheduler = new EmailScheduler(gmailService);
                         scheduler.start(() -> {
                             sendDailyEmail();
                         });
-                        notificationState=true;
+                        notificationState = true;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
                     request.setAttribute("dueDateSortingActive", "active");
                     request.setAttribute("notificationsActive", "active");
                     request.setAttribute("notificationsInactive", "");
                     listTasksSortedByDueDate(request, response, project);
-                }
+
             }
             case "doNotSendEmails"->{
                 if(notificationState) {
                     scheduler.stop();
                     notificationState=false;
+                }
                     request.setAttribute("dueDateSortingActive", "active");
                     request.setAttribute("notificationsInactive", "active");
                     listTasksSortedByDueDate(request, response, project);
-                }
+
             }
             case "download"-> {
                 String fileName = request.getParameter("fileName");
