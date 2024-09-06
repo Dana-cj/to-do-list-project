@@ -60,7 +60,7 @@
             <td><c:out value = "${task.project}"/></td>
             <td>
                 <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=editTask&taskId=<c:out value = "${task.id}"/>">
-                             <c:out value = "${task.description}"/></i>
+                             <c:out value = "${task.description}"/><i class="bi bi-pencil"></i>
                 </a>
             </td>
             <td><c:out value = "${task.formattedInitialDate}"/></td>
@@ -75,12 +75,12 @@
              </c:forEach>
             </td>
             <td>
-                <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=editTask&taskId=<c:out value = "${task.id}"/>">
-                  Edit Task <i class="bi bi-pencil"></i>
-                 </a>
-
                 <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=delete&taskId=<c:out value = "${task.id}"/>">
-                 Delete <i class="bi bi-trash"></i>
+                 Delete task<i class="bi bi-trash"></i>
+                </a>
+
+                <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=deleteFilesOrContacts&taskId=<c:out value = "${task.id}"/>">
+                   Delete files/contacts<i class="bi bi-trash"></i>
                 </a>
             </td>
         </tr>

@@ -4,22 +4,22 @@
 
   <form method="post" action="tasks?action=editTask&taskId=<c:out value = "${requestScope.task.id}"/>" enctype="multipart/form-data">
       <div class="form-group mt-5">
-         <label for="project">Project: </label>
+         <label for="project"><strong>Project:</strong></label>
          <input type="text" class="form-control" id="project" name="project" value="<c:out value= "${requestScope.task.project}"/>">
       </div>
 
       <div class="form-group mt-5">
-        <label for="description">Description: </label>
+        <label for="description"><strong>Description:</strong></label>
         <input type="text" class="form-control" id="description" name="description" value="<c:out value= "${requestScope.task.description}"/>">
       </div>
 
       <div class="form-group mt-5">
-        <label for="dueDate">Due date: </label>
+        <label for="dueDate"><strong>Due date:</strong></label>
         <input type="date" id="dueDate" name="dueDate" value= "<c:out value= "${requestScope.task.localDueDate}"/>">
       </div>
 
 
-    <label class="my-1 mr-2 form-group mt-5" for="inlineFormCustomSelectPref">Priority: </label>
+    <label class="my-1 mr-2 form-group mt-5" for="inlineFormCustomSelectPref"><strong>Priority:</strong></label>
       <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref" name="priority">
         <option selected><c:out value= "${requestScope.task.priority}"/></option>
         <option value="HIGH">HIGH</option>
@@ -27,7 +27,7 @@
         <option value="LOW">LOW</option>
       </select>
 
-    <label class="my-1 mr-2 form-group mt-5" for="inlineFormCustomSelectPref2">Status: </label>
+    <label class="my-1 mr-2 form-group mt-5" for="inlineFormCustomSelectPref2"><strong>Status:</strong></label>
       <select class="custom-select my-1 mr-sm-2" id="inlineFormCustomSelectPref2" name="status">
         <option selected><c:out value= "${requestScope.task.status}"/></option>
         <option value="TO_DO">TO DO</option>
@@ -35,39 +35,39 @@
         <option value="DONE">DONE</option>
       </select>
 
-    <h6 class="mt-5">Email addresses:</h6>
+    <p class="mt-5"><strong>Email addresses:</strong></p>
        <c:forEach items="${requestScope.task.contacts}" var="contact">
-            <div class="form-group mt-5">
-               <input type="email" class="form-control" id="email" name="email" value="<c:out value= "${contact.emailAddress}"/>">
-               <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=deleteContact&taskId=<c:out value= "${requestScope.task.id}"/>&contactId=<c:out value = "${contact.id}"/>">
-                    Delete email address<i class="bi bi-trash"></i>
-               </a>
+            <div class="form-group mt-1">
+               <input type="email" class="form-control" id="email" name="email" value="<c:out value= "${contact.emailAddress}"/>" disabled>
             </div>
        </c:forEach>
 
-    <h6 class="mt-5">Add email addresses of persons involved:</h6>
     <div class="form-group mt-5">
-          <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
+    <p><strong>Add new email addresses of persons involved:</strong></p>
+          <label for="email">Choose one of your existing contacts: </label>
+          <select class="custom-select my-1 mr-sm-2" id="email" name="email">
+            <option value="">                         </option>
+            <c:forEach items="${requestScope.allContacts}" var="contact">
+                   <option value="<c:out value= "${contact}"/>"><c:out value= "${contact}"/></option>
+            </c:forEach>
+          </select>
           <p class="help-block">*******You can enter email addresses where reminders will be sent ******</p>
      </div>
 
-     <h6 class="mt-5">Files attached:</h6>
+     <div class="form-group mt-1">
+          <label for="newEmail">New contact: </label>
+          <input type="email" class="form-control" id="newEmail" name="newEmail" placeholder="name@example.com">
+          <p class="help-block">*******You can enter email addresses where reminders will be sent ******</p>
+     </div>
+
+     <p class="mt-5"><strong>Files attached:</strong></p>
 
      <c:forEach items="${requestScope.task.files}" var="file">
-
-                <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=download&fileName=<c:out value = "${file.name}"/>">
                     <i class="bi bi-file-earmark"></i><c:out value = "${file.name}"/>
-                </a>
-
-                <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=deleteFile&taskId=<c:out value= "${requestScope.task.id}"/>&fileId=<c:out value = "${file.id}"/>">
-                    -   Delete file<i class="bi bi-trash"></i>
-                </a>
-
      </c:forEach>
 
-     <h6 class="mt-5">Add files:</h6>
      <div class="form-group mt-5">
-            <label for="files">File input</label>
+            <label for="files"><strong>Add new files:</strong></label>
             <input type="file" id="files" name="files" />
             <input type="file" name="files" />
             <input type="file" name="files" />

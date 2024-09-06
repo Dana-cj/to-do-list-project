@@ -65,7 +65,12 @@ public class TasksServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //set tasks active
         request.setAttribute("tasksActive", "active");
-        request.setAttribute("notificationsInactive", "active");
+        //set notifications active
+        if(notificationState) {
+            request.setAttribute("notificationsActive", "active");
+        } else {
+            request.setAttribute("notificationsInactive", "active");
+        }
         //retrieve username
         HttpSession session = request.getSession(false);
         username = (String) session.getAttribute("username");
@@ -77,7 +82,6 @@ public class TasksServlet extends HttpServlet {
                 browserLanguage = languages[0].trim();
             }
         }
-
 
         List<String> projects=new ArrayList<>();
         taskService.findAllTasksOfUser(username)
@@ -112,11 +116,17 @@ public class TasksServlet extends HttpServlet {
                 request.setAttribute("statusSortingActive", "active");
                 listTasksSortedByStatus(request, response, project);
             }
-            case "add"->    request.getRequestDispatcher("jsps/task/add.jsp").forward(request,response);
+            case "add"->   {
+                //List<Contact> allContacts = getAllContacts();
+                request.setAttribute("allContacts", getAllEmailAddresses());
+                request.getRequestDispatcher("jsps/task/add.jsp").forward(request,response);
+            }
             case "editTask"-> {
                 int id= Integer.parseInt(request.getParameter("taskId"));
                 Task task= taskService.findTaskById(id);
                 request.setAttribute("task", task);
+                //List<Contact> allContacts = getAllContacts();
+                request.setAttribute("allContacts", getAllEmailAddresses());
                 request.getRequestDispatcher("jsps/task/editTask.jsp").forward(request,response);
             }
             case "delete"-> {
@@ -126,19 +136,29 @@ public class TasksServlet extends HttpServlet {
                 listTasksSortedByDueDate(request, response, project);
                 //response.sendRedirect(request.getContextPath()+"/tasks");
             }
+            case "deleteFilesOrContacts"->{
+                int id= Integer.parseInt(request.getParameter("taskId"));
+                Task task= taskService.findTaskById(id);
+                request.setAttribute("task", task);
+                //List<Contact> allContacts = getAllContacts();
+                request.setAttribute("allContacts", getAllEmailAddresses());
+                request.getRequestDispatcher("jsps/task/deleteFilesAndContacts.jsp").forward(request,response);
+            }
             case "deleteFile"->{
                 int taskId= Integer.parseInt(request.getParameter("taskId"));
                 int fileId= Integer.parseInt(request.getParameter("fileId"));
                 taskService.deleteFile(fileId);
                 request.setAttribute("task", taskService.findTaskById(taskId));
-                request.getRequestDispatcher("jsps/task/editTask.jsp").forward(request,response);
+                request.setAttribute("allContacts", getAllEmailAddresses());
+                request.getRequestDispatcher("jsps/task/deleteFilesAndContacts.jsp").forward(request,response);
             }
             case "deleteContact"->{
                 int taskId= Integer.parseInt(request.getParameter("taskId"));
                 int contactId= Integer.parseInt(request.getParameter("contactId"));
                 taskService.deleteContact(contactId);
                 request.setAttribute("task", taskService.findTaskById(taskId));
-                request.getRequestDispatcher("jsps/task/editTask.jsp").forward(request,response);
+                request.setAttribute("allContacts", getAllEmailAddresses());
+                request.getRequestDispatcher("jsps/task/deleteFilesAndContacts.jsp").forward(request,response);
             }
             case "sendEmails"->{
                 if(!notificationState) {
@@ -168,6 +188,7 @@ public class TasksServlet extends HttpServlet {
                 }
                     request.setAttribute("dueDateSortingActive", "active");
                     request.setAttribute("notificationsInactive", "active");
+                    request.setAttribute("notificationsActive", "");
                     listTasksSortedByDueDate(request, response, project);
 
             }
@@ -197,6 +218,8 @@ public class TasksServlet extends HttpServlet {
             }
         }
     }
+
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -247,9 +270,16 @@ public class TasksServlet extends HttpServlet {
                 }
 
                 String email = request.getParameter("email");
+                int contactId = taskService.contactNextId();
                 if(!email.isBlank()) {
-                    int contactId = taskService.contactNextId();
                     taskService.createTaskContact(new Contact(contactId, taskId, email));
+                    taskService.findTaskById(taskId).addContacts(taskService.findContactById(contactId));
+                    contactId++;
+                }
+
+                String newEmail = request.getParameter("newEmail");
+                if(!newEmail.isBlank()) {
+                    taskService.createTaskContact(new Contact(contactId, taskId, newEmail));
                     taskService.findTaskById(taskId).addContacts(taskService.findContactById(contactId));
                 }
 
@@ -293,9 +323,16 @@ public class TasksServlet extends HttpServlet {
                 }
 
                 String email = request.getParameter("email");
+                int contactId = taskService.contactNextId();
                 if(!email.isBlank()) {
-                    int contactId = taskService.contactNextId();
                     taskService.createTaskContact(new Contact(contactId, taskId, email));
+                    taskService.findTaskById(taskId).addContacts(taskService.findContactById(contactId));
+                    contactId++;
+                }
+
+                String newEmail = request.getParameter("newEmail");
+                if(!newEmail.isBlank()) {
+                    taskService.createTaskContact(new Contact(contactId, taskId, newEmail));
                     taskService.findTaskById(taskId).addContacts(taskService.findContactById(contactId));
                 }
 
@@ -382,6 +419,29 @@ public class TasksServlet extends HttpServlet {
                 .collect(Collectors.toList());
         return tasks;
     }
+
+    private List<String> getAllEmailAddresses() {
+        List<Contact> allContacts=new ArrayList<>();
+        List<Task> usersTasks= taskService.findAllTasksOfUser(username);
+        for (Task task:usersTasks) {
+            List<Contact> taskContacts= taskService.findContactsByTaskId(task.getId());
+            for (Contact contact:taskContacts) {
+                if(!allContacts.contains(contact)){
+                    allContacts.add(contact);
+                }
+            }
+        }
+        List<String> allEmailAddresses =new ArrayList<>();
+        allContacts.stream()
+                .map(contact -> contact.getEmailAddress())
+                .forEach(email->{
+                    if(!allEmailAddresses.contains(email)) {
+                        allEmailAddresses.add(email);
+                    }
+                });
+        return allEmailAddresses;
+    }
+
     private void sendDailyEmail() {
         try {
             List<Task> tasks= findTasksDueTomorrow();
@@ -392,7 +452,7 @@ public class TasksServlet extends HttpServlet {
                             ""+contact.getEmailAddress(),
                             "me",
                             "Reminder: task's due date is tomorrow!",
-                            "To do: "+task.getDescription()+", due date:"+task.getFormattedDueDate()+"."
+                            "Hello!\n"+"This is a friendly reminder that your task: "+task.getDescription()+" is due on: "+task.getFormattedDueDate()+"."
                     );
                 }
 

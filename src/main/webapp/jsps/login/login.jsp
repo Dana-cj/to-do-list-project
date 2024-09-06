@@ -40,7 +40,7 @@
 
 <div class="card-body text-center mt-5">
     <a href="<c:out value="${pageContext.request.contextPath}"/>/login?action=createAccount">
-        <h2>Create Account</h2>
+        <h3>Create Account</h3>
     </a>
 </div>
 <%@ include file="../shared/footer.jsp" %>
