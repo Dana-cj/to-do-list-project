@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Vector;
 
 public class TaskService {
     private Connection dbConnection;
@@ -377,5 +378,40 @@ public class TaskService {
             e.printStackTrace(System.err);
         }
         return projects;
+    }
+
+    public List<Task> findAllTasks() {
+        List<Task> tasks = new Vector<>();
+        try {
+            Statement statement = dbConnection.createStatement();
+            ResultSet results = statement.executeQuery("select * from tasks");
+
+            while (results.next()) {
+                int taskId=results.getInt(1);
+                List<File> files= findFilesByTaskId(taskId);
+                List<Contact> contacts= findContactsByTaskId(taskId);
+                GregorianCalendar date1= new GregorianCalendar();
+                java.util.Date myDate1= new java.util.Date(results.getDate(3).getTime());
+                date1.setTime(myDate1);
+
+                GregorianCalendar date2= new GregorianCalendar();
+                java.util.Date myDate2= new java.util.Date(results.getDate(4).getTime());
+                date2.setTime(myDate2);
+
+
+                tasks.add(
+                        new Task(taskId,
+                                results.getString(2),
+                                date1,
+                                date2,
+                                Priority.valueOf(results.getString(5)),
+                                Status.valueOf(results.getString(6).replace(" ","_")),
+                                results.getString(7),
+                                files, contacts));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(System.err);
+        }
+        return tasks;
     }
 }

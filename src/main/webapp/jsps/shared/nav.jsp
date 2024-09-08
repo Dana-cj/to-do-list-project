@@ -16,19 +16,4 @@
          </div>
     </nav>
 
-    <ul class="nav nav-underline justify-content-end">
-      <li class="nav-item">
-        <a class="nav-link <c:out value="${requestScope.notificationsActive}"/>" href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=sendEmails">
-        <i class="bi bi-gear"></i> Enable  reminders
-        </a>
-      </li>
-    </ul>
-
-    <ul class="nav nav-underline justify-content-end">
-          <li class="nav-item">
-            <a class="nav-link <c:out value="${requestScope.notificationsInactive}"/>" href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=doNotSendEmails">
-            <i class="bi bi-gear"></i> Disable reminders
-            </a>
-          </li>
-    </ul>
 </div>

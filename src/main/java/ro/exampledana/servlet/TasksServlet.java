@@ -23,10 +23,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @WebServlet(name = "TasksServlet", urlPatterns = {"/tasks"})
@@ -42,7 +39,7 @@ public class TasksServlet extends HttpServlet {
     public TaskService taskService;
     private EmailScheduler scheduler;
     private GmailService gmailService;
-    private boolean notificationState;
+    //private boolean notificationState;
     public static String browserLanguage;
     private static final String UPLOAD_PATH= "C:\\upload\\";
     private String username;
@@ -66,11 +63,13 @@ public class TasksServlet extends HttpServlet {
         //set tasks active
         request.setAttribute("tasksActive", "active");
         //set notifications active
-        if(notificationState) {
-            request.setAttribute("notificationsActive", "active");
-        } else {
-            request.setAttribute("notificationsInactive", "active");
-        }
+
+//        if(notificationState) {
+//            request.setAttribute("notificationsActive", "active");
+//        } else {
+//            request.setAttribute("notificationsInactive", "active");
+//        }
+
         //retrieve username
         HttpSession session = request.getSession(false);
         username = (String) session.getAttribute("username");
@@ -82,7 +81,7 @@ public class TasksServlet extends HttpServlet {
                 browserLanguage = languages[0].trim();
             }
         }
-
+        //set attribute project for project filter
         List<String> projects=new ArrayList<>();
         taskService.findAllTasksOfUser(username)
                 .stream()
@@ -94,7 +93,6 @@ public class TasksServlet extends HttpServlet {
                         projects.add(project);
                     }
                 });
-
         request.setAttribute("projects", projects);
         project= request.getParameter("project");
         if(project!=null&&!project.isBlank()){
@@ -160,38 +158,7 @@ public class TasksServlet extends HttpServlet {
                 request.setAttribute("allContacts", getAllEmailAddresses());
                 request.getRequestDispatcher("jsps/task/deleteFilesAndContacts.jsp").forward(request,response);
             }
-            case "sendEmails"->{
-                if(!notificationState) {
-                    try {
-                        // Initialize Gmail service
-                        gmailService = new GmailService();
-                        // Start email scheduler
-                        scheduler = new EmailScheduler(gmailService);
-                        scheduler.start(() -> {
-                            sendDailyEmail();
-                        });
-                        notificationState = true;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                    request.setAttribute("dueDateSortingActive", "active");
-                    request.setAttribute("notificationsActive", "active");
-                    request.setAttribute("notificationsInactive", "");
-                    listTasksSortedByDueDate(request, response, project);
 
-            }
-            case "doNotSendEmails"->{
-                if(notificationState) {
-                    scheduler.stop();
-                    notificationState=false;
-                }
-                    request.setAttribute("dueDateSortingActive", "active");
-                    request.setAttribute("notificationsInactive", "active");
-                    request.setAttribute("notificationsActive", "");
-                    listTasksSortedByDueDate(request, response, project);
-
-            }
             case "download"-> {
                 String fileName = request.getParameter("fileName");
                 // Get the upload directory path
@@ -407,18 +374,18 @@ public class TasksServlet extends HttpServlet {
                 "</html>");
     }
 
-    private List<Task> findTasksDueTomorrow() {
-        List<Task> tasks= taskService.findAllTasksOfUser(username)
-                .stream()
-                .filter(task->!task.getStatus().equalsIgnoreCase("DONE"))
-                .filter(Task::isItDueTomorrow)
-                //.filter(task-> task.getProject().toUpperCase().matches((project==null||project.isBlank()||project.equalsIgnoreCase("all"))?".*":project.toUpperCase()))
-                .sorted(Comparator.comparing(Task::getDueDate)
-                        .thenComparing(Task::getPriorityValue)
-                        .thenComparing(Task::getInitialDate))
-                .collect(Collectors.toList());
-        return tasks;
-    }
+//    public List<Task> findTasksDueTomorrow() {
+//        List<Task> tasks= taskService.findAllTasksOfUser(username)
+//                .stream()
+//                .filter(task->!task.getStatus().equalsIgnoreCase("DONE"))
+//                .filter(Task::isItDueTomorrow)
+//                //.filter(task-> task.getProject().toUpperCase().matches((project==null||project.isBlank()||project.equalsIgnoreCase("all"))?".*":project.toUpperCase()))
+//                .sorted(Comparator.comparing(Task::getDueDate)
+//                        .thenComparing(Task::getPriorityValue)
+//                        .thenComparing(Task::getInitialDate))
+//                .collect(Collectors.toList());
+//        return tasks;
+//    }
 
     private List<String> getAllEmailAddresses() {
         List<Contact> allContacts=new ArrayList<>();
@@ -442,24 +409,38 @@ public class TasksServlet extends HttpServlet {
         return allEmailAddresses;
     }
 
-    private void sendDailyEmail() {
-        try {
-            List<Task> tasks= findTasksDueTomorrow();
-            for (Task task:tasks) {
-                List<Contact> contacts= taskService.findContactsByTaskId(task.getId());
-                for (Contact contact:contacts) {
-                    gmailService.sendEmail(
-                            ""+contact.getEmailAddress(),
-                            "me",
-                            "Reminder: task's due date is tomorrow!",
-                            "Hello!\n"+"This is a friendly reminder that your task: "+task.getDescription()+" is due on: "+task.getFormattedDueDate()+"."
-                    );
-                }
 
-            }
+//    public void sendDailyEmail() {
+//        try {
+//            List<Task> tasks= findTasksDueTomorrow();
+//            for (Task task:tasks) {
+//                List<Contact> contacts= taskService.findContactsByTaskId(task.getId());
+//                for (Contact contact:contacts) {
+//                    gmailService.sendEmail(
+//                            ""+contact.getEmailAddress(),
+//                            "me",
+//                            "Reminder: task's due date is tomorrow!",
+//                            "Hello!\n"+"This is a friendly reminder that your task: "+task.getDescription()+" is due on: "+task.getFormattedDueDate()+"."
+//                    );
+//                }
+//
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    public Map<Task,List<Contact>> findContactsToSendEmails(){
+//        Map<Task,List<Contact>> taskContacts=new HashMap<>();
+//        List<Task> tasks= findTasksDueTomorrow();
+//        for (Task task:tasks) {
+//            List<Contact> contacts= taskService.findContactsByTaskId(task.getId());
+//
+//            taskContacts.put(task,contacts);
+//        }
+//        return taskContacts;
+//    }
+
 }
+
