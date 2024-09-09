@@ -36,7 +36,7 @@ public class TasksServlet extends HttpServlet {
     @Serial
     private static final long serialVersionUID = 1L;
     private Connection dbConnection;
-    public TaskService taskService;
+    private TaskService taskService;
     private EmailScheduler scheduler;
     private GmailService gmailService;
     //private boolean notificationState;
@@ -62,13 +62,6 @@ public class TasksServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         //set tasks active
         request.setAttribute("tasksActive", "active");
-        //set notifications active
-
-//        if(notificationState) {
-//            request.setAttribute("notificationsActive", "active");
-//        } else {
-//            request.setAttribute("notificationsInactive", "active");
-//        }
 
         //retrieve username
         HttpSession session = request.getSession(false);
@@ -374,18 +367,6 @@ public class TasksServlet extends HttpServlet {
                 "</html>");
     }
 
-//    public List<Task> findTasksDueTomorrow() {
-//        List<Task> tasks= taskService.findAllTasksOfUser(username)
-//                .stream()
-//                .filter(task->!task.getStatus().equalsIgnoreCase("DONE"))
-//                .filter(Task::isItDueTomorrow)
-//                //.filter(task-> task.getProject().toUpperCase().matches((project==null||project.isBlank()||project.equalsIgnoreCase("all"))?".*":project.toUpperCase()))
-//                .sorted(Comparator.comparing(Task::getDueDate)
-//                        .thenComparing(Task::getPriorityValue)
-//                        .thenComparing(Task::getInitialDate))
-//                .collect(Collectors.toList());
-//        return tasks;
-//    }
 
     private List<String> getAllEmailAddresses() {
         List<Contact> allContacts=new ArrayList<>();
@@ -408,39 +389,6 @@ public class TasksServlet extends HttpServlet {
                 });
         return allEmailAddresses;
     }
-
-
-//    public void sendDailyEmail() {
-//        try {
-//            List<Task> tasks= findTasksDueTomorrow();
-//            for (Task task:tasks) {
-//                List<Contact> contacts= taskService.findContactsByTaskId(task.getId());
-//                for (Contact contact:contacts) {
-//                    gmailService.sendEmail(
-//                            ""+contact.getEmailAddress(),
-//                            "me",
-//                            "Reminder: task's due date is tomorrow!",
-//                            "Hello!\n"+"This is a friendly reminder that your task: "+task.getDescription()+" is due on: "+task.getFormattedDueDate()+"."
-//                    );
-//                }
-//
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public Map<Task,List<Contact>> findContactsToSendEmails(){
-//        Map<Task,List<Contact>> taskContacts=new HashMap<>();
-//        List<Task> tasks= findTasksDueTomorrow();
-//        for (Task task:tasks) {
-//            List<Contact> contacts= taskService.findContactsByTaskId(task.getId());
-//
-//            taskContacts.put(task,contacts);
-//        }
-//        return taskContacts;
-//    }
 
 }
 

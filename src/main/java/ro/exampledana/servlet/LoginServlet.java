@@ -25,7 +25,7 @@ public class LoginServlet extends HttpServlet {
     @Serial
     private static final long serialVersionUID = 2L;
     private Connection dbConnection;
-    public UserService userService;
+    private UserService userService;
 
     @Override
     public void init(ServletConfig config) {

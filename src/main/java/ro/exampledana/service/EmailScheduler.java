@@ -75,7 +75,7 @@ public class EmailScheduler {
             e.printStackTrace();
         }
     }
-    public Map<Task,List<Contact>> findContactsToSendEmails(){
+    private Map<Task,List<Contact>> findContactsToSendEmails(){
         Map<Task,List<Contact>> taskContacts=new Hashtable<>();
         List<Task> tasks= findTasksDueTomorrow();
         for (Task task:tasks) {
@@ -85,7 +85,7 @@ public class EmailScheduler {
         }
         return taskContacts;
     }
-    public List<Task> findTasksDueTomorrow() {
+    private List<Task> findTasksDueTomorrow() {
         List<Task> tasks= taskService.findAllTasks()
                 .stream()
                 .filter(task->!task.getStatus().equalsIgnoreCase("DONE"))

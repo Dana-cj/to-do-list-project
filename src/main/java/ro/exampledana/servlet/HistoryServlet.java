@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @WebServlet(urlPatterns = {"/history"})
 public class HistoryServlet extends HttpServlet {
     private Connection dbConnection;
-    public TaskService taskService;
+    private TaskService taskService;
     private String username;
 
     @Override
