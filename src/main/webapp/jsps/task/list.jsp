@@ -75,13 +75,18 @@
              </c:forEach>
             </td>
             <td>
-                <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=delete&taskId=<c:out value = "${task.id}"/>">
-                 Delete task<i class="bi bi-trash"></i>
-                </a>
-
-                <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=deleteFilesOrContacts&taskId=<c:out value = "${task.id}"/>">
-                   Delete files/contacts<i class="bi bi-trash"></i>
-                </a>
+                <ul class="list-group">
+                  <li class="list-group-item">
+                    <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=delete&taskId=<c:out value = "${task.id}"/>">
+                        Delete task<i class="bi bi-trash"></i>
+                    </a>
+                  </li>
+                  <li class="list-group-item">
+                    <a href="<c:out value="${pageContext.request.contextPath}"/>/tasks?action=deleteFilesOrContacts&taskId=<c:out value = "${task.id}"/>">
+                        Delete files/contacts<i class="bi bi-trash"></i>
+                    </a>
+                  </li>
+                </ul>
             </td>
         </tr>
         </c:forEach>

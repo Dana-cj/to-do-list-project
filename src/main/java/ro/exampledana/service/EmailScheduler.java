@@ -60,17 +60,23 @@ public class EmailScheduler {
             Map<Task, List<Contact>> taskContacts= findContactsToSendEmails();
             for (Map.Entry<Task, List<Contact>> entry: taskContacts.entrySet()) {
             Task task= entry.getKey();
+            List<String> filesNames= new Vector<>();
+                for (File file:task.getFiles()) {
+                    filesNames.add(file.getName());
+                }
             List<Contact> contacts=entry.getValue();
                 for (Contact contact:contacts) {
                     gmailService.sendEmail(
                             ""+contact.getEmailAddress(),
                             "me",
-                            "Reminder: task's due date is tomorrow!",
-                            "Hello!\n"+"This is a friendly reminder that your task: "+task.getDescription()+" is due tomorrow."
+                            "Reminder: "+task.getDescription(),
+                            "Hello!\n"+"This is a friendly reminder that your task: \n"+task.getDescription()+", part of project: "+task.getProject().trim()+", is due tomorrow.",
+                            CalendarDataSource.createICSFileContent("task: "+(task.getDescription()+", project: "+task.getProject()),
+                                    task.getDueDate()),
+                           filesNames
                     );
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

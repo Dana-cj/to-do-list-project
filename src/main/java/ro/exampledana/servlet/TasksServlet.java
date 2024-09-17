@@ -41,7 +41,7 @@ public class TasksServlet extends HttpServlet {
     private GmailService gmailService;
     //private boolean notificationState;
     public static String browserLanguage;
-    private static final String UPLOAD_PATH= "C:\\upload\\";
+    public static final String UPLOAD_PATH= "C:\\upload\\";
     private String username;
     private String project;
 

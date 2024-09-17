@@ -14,11 +14,18 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
+import ro.exampledana.servlet.TasksServlet;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.io.*;
 import java.util.Collections;
 import java.util.List;
@@ -67,12 +74,12 @@ public class GmailService {
     }
 
 
-    public void sendEmail(String to, String from, String subject, String bodyText) throws MessagingException, IOException {
-        MimeMessage email = createEmail(to, "me", subject, bodyText);
+    public void sendEmail(String to, String from, String subject, String bodyText, String icsContent, List<String> files) throws MessagingException, IOException {
+        MimeMessage email = createEmail(to, "me", subject, bodyText, icsContent, files);
         sendMessage(gmailService, "me", email);
     }
 
-    private MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
+    private MimeMessage createEmail(String to, String from, String subject, String bodyText,String icsContent, List<String> files) throws MessagingException {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
 
@@ -80,7 +87,36 @@ public class GmailService {
         email.setFrom(new InternetAddress(from));
         email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
         email.setSubject(subject);
-        email.setText(bodyText);
+       // email.setText(bodyText);
+        // Create multipart email content
+        Multipart multipart = new MimeMultipart();
+
+        // Body part for the plain text content of the email
+        MimeBodyPart textPart = new MimeBodyPart();
+        textPart.setText(bodyText);
+        multipart.addBodyPart(textPart);
+
+        // Body part for the ICS file (calendar invite)
+        MimeBodyPart icsPart = new MimeBodyPart();
+        icsPart.setDataHandler(new DataHandler(new CalendarDataSource(icsContent)));
+        icsPart.setFileName("invite.ics");  // Set file name for ICS file
+
+        // Add ICS part to the multipart
+        multipart.addBodyPart(icsPart);
+
+        // Body part for another file attachment (e.g., a PDF or image)
+        if(files!=null&&files.size()>0) {
+            for (String fileName : files) {
+                MimeBodyPart attachmentPart = new MimeBodyPart();
+                DataSource source = new FileDataSource(TasksServlet.UPLOAD_PATH + fileName);
+                attachmentPart.setDataHandler(new DataHandler(source));
+                attachmentPart.setFileName(fileName);
+                multipart.addBodyPart(attachmentPart);
+            }
+        }
+
+        // Set the email content
+        email.setContent(multipart);
         return email;
     }
 
