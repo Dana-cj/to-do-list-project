@@ -92,7 +92,6 @@ Create a PostgreSQL database and update the `context.xml` with the appropriate d
 
 - Implement REST APIs for better scalability.
 - Add OAuth-based authentication.
-- Implement notifications and reminders.
 
 ## License
 
